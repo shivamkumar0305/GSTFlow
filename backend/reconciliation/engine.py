@@ -15,7 +15,7 @@ An invoice record is a dict with keys:
 `date` or None.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from decimal import Decimal
 
 MATCHED = "matched"
@@ -25,6 +25,7 @@ VALUE_MISMATCH = "value_mismatch"
 DUPLICATE = "duplicate"
 GSTIN_MISMATCH = "gstin_mismatch"
 DATE_MISMATCH = "date_mismatch"
+FUZZY_MATCH = "fuzzy_match"
 
 DEFAULT_VALUE_TOLERANCE = Decimal("1.00")
 GSTIN_MAX_EDIT_DISTANCE = 2
@@ -36,6 +37,7 @@ class MatchResult:
     books_invoice_id: int | None
     statement_invoice_id: int | None
     detail: str = ""
+    confidence_score: int = 100
 
 
 def _invoice_value(rec: dict) -> Decimal:
@@ -62,6 +64,37 @@ def _edit_distance(a: str, b: str) -> int:
             curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost)
         prev = curr
     return prev[-1]
+
+
+def _similarity(a: str, b: str) -> float:
+    """Normalized edit-distance similarity for short invoice/GSTIN strings."""
+    a, b = str(a or ""), str(b or "")
+    if not a and not b:
+        return 1.0
+    return max(0.0, 1 - (_edit_distance(a, b) / max(len(a), len(b), 1)))
+
+
+def _fuzzy_confidence(book_rec: dict, stmt_rec: dict) -> int:
+    """Conservative, deterministic confidence score for a review candidate.
+
+    Invoice number carries most of the weight; GSTIN, value and date provide
+    corroborating evidence. Candidates must clear a high threshold before they
+    are shown to a reviewer.
+    """
+    invoice_similarity = _similarity(
+        _norm_invoice_number(book_rec.get("invoice_number", "")),
+        _norm_invoice_number(stmt_rec.get("invoice_number", "")),
+    )
+    gstin_similarity = _similarity(book_rec.get("supplier_gstin", ""), stmt_rec.get("supplier_gstin", ""))
+    book_value, stmt_value = _invoice_value(book_rec), _invoice_value(stmt_rec)
+    value_similarity = max(0.0, 1 - float(abs(book_value - stmt_value) / max(book_value, stmt_value, Decimal("1"))))
+    dates_match = bool(
+        book_rec.get("invoice_date")
+        and stmt_rec.get("invoice_date")
+        and book_rec["invoice_date"] == stmt_rec["invoice_date"]
+    )
+    score = invoice_similarity * 55 + gstin_similarity * 20 + value_similarity * 20 + (5 if dates_match else 0)
+    return round(score)
 
 
 def _find_duplicates(records: list[dict]) -> tuple[dict[tuple, dict], list[MatchResult]]:
@@ -125,6 +158,7 @@ def reconcile(
                         f"Books show invoice value {_invoice_value(book_rec)} but GSTR-2A/2B shows "
                         f"{_invoice_value(stmt_rec)} (difference of {diff})."
                     ),
+                    confidence_score=95,
                 )
             )
         elif (
@@ -184,6 +218,37 @@ def reconcile(
             consumed_book_keys.add(bkey)
             consumed_stmt_keys.add(skey)
             break
+
+    # Second fuzzy pass: invoice-number variants or close values with enough
+    # supporting evidence become reviewable suggestions, never auto-matches.
+    for bkey in unmatched_book_keys - consumed_book_keys:
+        book_rec = books_by_key[bkey]
+        candidates = []
+        for skey in unmatched_stmt_keys - consumed_stmt_keys:
+            stmt_rec = stmt_by_key[skey]
+            gstin_similarity = _similarity(book_rec.get("supplier_gstin", ""), stmt_rec.get("supplier_gstin", ""))
+            if gstin_similarity < 0.6:
+                continue
+            confidence = _fuzzy_confidence(book_rec, stmt_rec)
+            if confidence >= 80:
+                candidates.append((confidence, skey, stmt_rec))
+        if not candidates:
+            continue
+        confidence, skey, stmt_rec = max(candidates, key=lambda item: item[0])
+        results.append(
+            MatchResult(
+                discrepancy_type=FUZZY_MATCH,
+                books_invoice_id=book_rec["id"],
+                statement_invoice_id=stmt_rec["id"],
+                detail=(
+                    f"Possible match: books invoice {book_rec['invoice_number']} and GSTR-2A/2B invoice "
+                    f"{stmt_rec['invoice_number']} have a {confidence}% similarity score. Review before accepting."
+                ),
+                confidence_score=confidence,
+            )
+        )
+        consumed_book_keys.add(bkey)
+        consumed_stmt_keys.add(skey)
 
     for bkey in unmatched_book_keys - consumed_book_keys:
         book_rec = books_by_key[bkey]

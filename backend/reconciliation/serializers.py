@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from invoices.serializers import InvoiceSerializer
 
-from .models import Discrepancy, ReconciliationRun
+from .models import Discrepancy, DiscrepancyAuditEvent, ReconciliationRun
 
 
 class ReconciliationRunSerializer(serializers.ModelSerializer):
@@ -37,13 +37,35 @@ class DiscrepancySerializer(serializers.ModelSerializer):
             "statement_invoice",
             "detail",
             "ai_explanation",
+            "confidence_score",
+            "risk_score",
+            "risk_level",
             "value_at_risk",
+            "review_status",
+            "resolution_note",
             "resolved",
             "created_at",
+            "updated_at",
         ]
 
 
 class DiscrepancyResolveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Discrepancy
-        fields = ["resolved"]
+        fields = ["resolved", "review_status", "resolution_note"]
+
+    def validate(self, attrs):
+        status = attrs.get("review_status")
+        if status == "resolved":
+            attrs["resolved"] = True
+        elif status and status != "resolved":
+            attrs["resolved"] = False
+        return attrs
+
+
+class DiscrepancyAuditEventSerializer(serializers.ModelSerializer):
+    actor_email = serializers.CharField(source="actor.email", read_only=True, default="System")
+
+    class Meta:
+        model = DiscrepancyAuditEvent
+        fields = ["id", "action", "detail", "actor_email", "created_at"]

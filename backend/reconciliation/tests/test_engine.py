@@ -88,3 +88,11 @@ class ReconcileTests(SimpleTestCase):
         stmt = [record(2, "27AAAAA0000A1Z5", "INV001", source="2a")]
         results = engine.reconcile(books, stmt)
         self.assertEqual(results[0].discrepancy_type, engine.MATCHED)
+
+    def test_invoice_number_typo_becomes_reviewable_fuzzy_match(self):
+        books = [record(1, "27AAAAA0000A1Z5", "INV-102", taxable=1000, tax=180)]
+        stmt = [record(2, "27AAAAA0000A1Z5", "INV-103", taxable=1000, tax=180, source="2a")]
+        results = engine.reconcile(books, stmt)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].discrepancy_type, engine.FUZZY_MATCH)
+        self.assertGreaterEqual(results[0].confidence_score, 80)

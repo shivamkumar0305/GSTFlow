@@ -35,6 +35,14 @@ class Discrepancy(models.Model):
         ("duplicate", "Duplicate"),
         ("gstin_mismatch", "GSTIN Mismatch"),
         ("date_mismatch", "Date Mismatch"),
+        ("fuzzy_match", "Possible Fuzzy Match"),
+    ]
+    REVIEW_STATUS_CHOICES = [
+        ("open", "Open"),
+        ("in_review", "In Review"),
+        ("supplier_contacted", "Supplier Contacted"),
+        ("resolved", "Resolved"),
+        ("ignored", "Ignored"),
     ]
 
     run = models.ForeignKey(ReconciliationRun, on_delete=models.CASCADE, related_name="discrepancies")
@@ -47,8 +55,14 @@ class Discrepancy(models.Model):
     )
     detail = models.CharField(max_length=500, blank=True)
     ai_explanation = models.TextField(blank=True)
+    confidence_score = models.PositiveSmallIntegerField(default=100)
+    risk_score = models.PositiveSmallIntegerField(default=0)
+    risk_level = models.CharField(max_length=10, default="low")
+    review_status = models.CharField(max_length=20, choices=REVIEW_STATUS_CHOICES, default="open")
+    resolution_note = models.TextField(blank=True)
     resolved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name_plural = "discrepancies"
@@ -60,3 +74,14 @@ class Discrepancy(models.Model):
         if inv is None or self.discrepancy_type == "matched":
             return 0
         return inv.tax_amount
+
+
+class DiscrepancyAuditEvent(models.Model):
+    discrepancy = models.ForeignKey(Discrepancy, on_delete=models.CASCADE, related_name="audit_events")
+    actor = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField(max_length=50)
+    detail = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

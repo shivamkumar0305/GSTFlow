@@ -7,7 +7,8 @@ from invoices.models import Invoice, InvoiceBatch
 
 from . import engine
 from .ai_explain import explain_discrepancy
-from .models import Discrepancy, ReconciliationRun
+from .models import Discrepancy, DiscrepancyAuditEvent, ReconciliationRun
+from .risk import score_discrepancy
 
 # Discrepancy types worth spending an AI call on. "matched" needs no
 # explanation; everything else benefits from a plain-language note.
@@ -18,6 +19,7 @@ EXPLAINABLE_TYPES = {
     engine.DUPLICATE,
     engine.GSTIN_MISMATCH,
     engine.DATE_MISMATCH,
+    engine.FUZZY_MATCH,
 }
 
 
@@ -102,6 +104,12 @@ def run_reconciliation(run_id: int):
         if at_risk_inv is not None:
             itc_at_risk += at_risk_inv.tax_amount
 
+        risk_score, risk_level = score_discrepancy(
+            result.discrepancy_type,
+            at_risk_inv.tax_amount if at_risk_inv else 0,
+            result.confidence_score,
+        )
+
         ai_explanation = ""
         if result.discrepancy_type in EXPLAINABLE_TYPES:
             context = {
@@ -120,10 +128,25 @@ def run_reconciliation(run_id: int):
                 statement_invoice_id=result.statement_invoice_id,
                 detail=result.detail,
                 ai_explanation=ai_explanation,
+                confidence_score=result.confidence_score,
+                risk_score=risk_score,
+                risk_level=risk_level,
             )
         )
 
     Discrepancy.objects.bulk_create(discrepancy_objs, batch_size=500)
+    created_discrepancies = Discrepancy.objects.filter(run=run)
+    DiscrepancyAuditEvent.objects.bulk_create(
+        [
+            DiscrepancyAuditEvent(
+                discrepancy=discrepancy,
+                action="created_by_reconciliation",
+                detail="Created automatically by the reconciliation engine.",
+            )
+            for discrepancy in created_discrepancies
+        ],
+        batch_size=500,
+    )
 
     run.total_books_invoices = len(books_records)
     run.total_statement_invoices = len(stmt_records)
