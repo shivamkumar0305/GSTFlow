@@ -36,6 +36,7 @@ class BaseUploadView(APIView):
         password = request.data.get("password") or None
         period = request.data.get("period", "")
 
+        file_bytes = None
         if upload_token:
             filename = cache.get(_key(upload_token, "filename"))
             if filename is None:
@@ -48,6 +49,7 @@ class BaseUploadView(APIView):
                     {"detail": "Too many incorrect password attempts. Please re-upload the file."},
                     status=429,
                 )
+            file_bytes = cache.get(_key(upload_token, "bytes"))
         else:
             f = request.FILES.get("file")
             if not f:
@@ -67,7 +69,8 @@ class BaseUploadView(APIView):
             cache.set(_key(upload_token, "attempts"), 0, UPLOAD_CACHE_TTL)
 
         if filename.lower().endswith((".xlsx", ".xls")) and not password:
-            file_bytes = cache.get(_key(upload_token, "bytes"))
+            if file_bytes is None:
+                file_bytes = cache.get(_key(upload_token, "bytes"))
             if file_bytes is not None and _is_encrypted_xlsx(file_bytes):
                 return Response(
                     {
@@ -89,7 +92,17 @@ class BaseUploadView(APIView):
             period=period,
             status="processing",
         )
-        parse_and_store_batch.delay(batch.id, upload_token, self.source)
+        if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+            parse_and_store_batch.delay(
+                batch.id,
+                upload_token,
+                self.source,
+                file_bytes=file_bytes,
+                filename=filename,
+                password=password,
+            )
+        else:
+            parse_and_store_batch.delay(batch.id, upload_token, self.source)
         return Response(
             {"batch_id": batch.id, "status": "processing", "upload_token": upload_token}, status=202
         )

@@ -3,6 +3,7 @@ Django settings for gstflow project.
 """
 
 import os
+import tempfile
 from datetime import timedelta
 from pathlib import Path
 
@@ -154,23 +155,53 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 # --- Celery ---
-
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TASK_ALWAYS_EAGER = (
+    os.environ.get("CELERY_TASK_ALWAYS_EAGER", "True").lower() in ("true", "1", "t")
+)
+CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_TASK_ALWAYS_EAGER = os.environ.get("CELERY_TASK_ALWAYS_EAGER", "False") == "True"
 
-# --- File upload password cache (Redis) ---
-# Short-lived cache for uploaded-file decryption passwords, keyed by a
-# per-upload token. Never pass raw passwords as Celery task args (they end
-# up in broker/result-backend logs).
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+if CELERY_TASK_ALWAYS_EAGER:
+    CELERY_BROKER_URL = "memory://"
+    CELERY_RESULT_BACKEND = "cache+memory://"
+else:
+    CELERY_BROKER_URL = os.environ.get(
+        "CELERY_BROKER_URL", os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    )
+    CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+
+# --- Cache configuration ---
+# If Redis is configured (via REDIS_CACHE_URL or REDIS_URL), use RedisCache.
+# Otherwise, fall back to FileBasedCache so all Gunicorn workers share the cache
+# (for DRF rate limiting, encrypted file decryption passwords, and upload buffers)
+# without requiring an external Redis service.
+REDIS_CACHE = os.environ.get("REDIS_CACHE_URL") or os.environ.get("REDIS_URL")
+
+if REDIS_CACHE:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_CACHE,
+        }
     }
-}
+else:
+    CACHE_DIR = Path(os.environ.get("CACHE_DIR", tempfile.gettempdir())) / "gstflow_cache"
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+    except OSError:
+        pass
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": str(CACHE_DIR),
+            "OPTIONS": {
+                "MAX_ENTRIES": 1000,
+            },
+        }
+    }
+
 UPLOAD_PASSWORD_TTL_SECONDS = 300
 UPLOAD_PASSWORD_MAX_ATTEMPTS = 5
 

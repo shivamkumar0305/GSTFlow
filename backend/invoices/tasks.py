@@ -20,14 +20,29 @@ def _bump_attempts(token: str) -> int:
 
 
 @shared_task
-def parse_and_store_batch(batch_id: int, upload_token: str, source: str):
+def parse_and_store_batch(
+    batch_id: int,
+    upload_token: str = "",
+    source: str = "",
+    file_bytes: bytes | None = None,
+    filename: str | None = None,
+    password: str | None = None,
+):
     batch = InvoiceBatch.objects.select_related("business").get(id=batch_id)
-    file_bytes = cache.get(_key(upload_token, "bytes"))
-    filename = cache.get(_key(upload_token, "filename"))
-    password = cache.get(_key(upload_token, "pw"))
+
+    if file_bytes is None and upload_token:
+        file_bytes = cache.get(_key(upload_token, "bytes"))
+    if filename is None and upload_token:
+        filename = cache.get(_key(upload_token, "filename"))
+    if filename is None:
+        filename = batch.original_filename
+    if password is None and upload_token:
+        password = cache.get(_key(upload_token, "pw"))
+
     # Discard the plaintext password immediately after reading it — never
     # keep it around longer than this task needs it.
-    cache.delete(_key(upload_token, "pw"))
+    if upload_token:
+        cache.delete(_key(upload_token, "pw"))
 
     if file_bytes is None or filename is None:
         batch.status = "failed"
@@ -38,7 +53,8 @@ def parse_and_store_batch(batch_id: int, upload_token: str, source: str):
     try:
         rows = parsing.parse_tabular_file(file_bytes, filename, password)
     except parsing.FileNeedsPassword:
-        _bump_attempts(upload_token)
+        if upload_token:
+            _bump_attempts(upload_token)
         batch.status = "failed"
         batch.error_message = "This file needs a password (or the password given was incorrect)."
         batch.save(update_fields=["status", "error_message"])
@@ -53,7 +69,7 @@ def parse_and_store_batch(batch_id: int, upload_token: str, source: str):
         Invoice(
             business=batch.business,
             batch=batch,
-            source=source,
+            source=source or batch.source,
             supplier_gstin=row["supplier_gstin"],
             supplier_name=row["supplier_name"],
             invoice_number=row["invoice_number"],
@@ -69,6 +85,7 @@ def parse_and_store_batch(batch_id: int, upload_token: str, source: str):
     batch.status = "done"
     batch.save(update_fields=["row_count", "status"])
 
-    cache.delete(_key(upload_token, "bytes"))
-    cache.delete(_key(upload_token, "filename"))
-    cache.delete(_key(upload_token, "attempts"))
+    if upload_token:
+        cache.delete(_key(upload_token, "bytes"))
+        cache.delete(_key(upload_token, "filename"))
+        cache.delete(_key(upload_token, "attempts"))

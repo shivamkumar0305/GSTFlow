@@ -70,3 +70,29 @@ class PasswordProtectedUploadTests(APITestCase):
         self.assertEqual(resp.status_code, 202)
         token = resp.data["upload_token"]
         self.assertIsNone(cache.get(f"upload:{token}:pw"))
+
+
+class PurchaseRegisterUploadTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        user = User.objects.create_user(username="b@b.com", email="b@b.com", password="pw12345!")
+        self.business = Business.objects.create(user=user, name="Biz2", gstin="27AAAAA0000A1Z5", pan="AAAAA0000A")
+        self.client.force_authenticate(user=user)
+
+    def test_purchase_register_csv_eager_upload(self):
+        csv_data = (
+            b"GSTIN of Supplier,Supplier Name,Invoice Number,Invoice Date,Taxable Value,Tax Amount\n"
+            b"29BBBBB1111B2Z8,Karnataka Steel Co,INV-1001,06-04-2026,10250,1845\n"
+            b"07CCCCC2222C3Z1,Delhi Packaging Ltd,INV-1002,07-04-2026,10500,1890\n"
+        )
+        f = SimpleUploadedFile("purchase_register.csv", csv_data, content_type="text/csv")
+        resp = self.client.post(reverse("upload-purchase-register"), {"file": f, "period": "04-2026"})
+        self.assertEqual(resp.status_code, 202)
+        batch_id = resp.data["batch_id"]
+
+        status_resp = self.client.get(reverse("upload-status", kwargs={"pk": batch_id}))
+        self.assertEqual(status_resp.status_code, 200)
+        self.assertEqual(status_resp.data["status"], "done")
+        self.assertEqual(status_resp.data["row_count"], 2)
+        self.assertEqual(status_resp.data["error_message"], "")
+
