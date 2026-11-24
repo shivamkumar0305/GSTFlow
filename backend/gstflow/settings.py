@@ -27,6 +27,13 @@ if not DEBUG and (not SECRET_KEY or SECRET_KEY.startswith("django-insecure-")):
     raise ImproperlyConfigured("SECRET_KEY must be set to a strong value when DEBUG=False.")
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
+CORS_ALLOWED_ORIGINS = [
+    "https://gst-flow-ten.vercel.app",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://gst-flow-ten.vercel.app",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
