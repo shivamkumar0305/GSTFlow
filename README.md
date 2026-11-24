@@ -138,6 +138,13 @@ npm run dev   # http://localhost:3000
 
 `frontend/.env.local` points at `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`.
 
+For the current hosted backend, set this in Vercel's Production environment
+(or copy `frontend/.env.production.example` for a local production build):
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://gstflow-1.onrender.com
+```
+
 ### Demo flow
 
 1. Register a business account at `/register`.
