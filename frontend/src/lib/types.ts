@@ -63,7 +63,10 @@ export type DiscrepancyType =
   | "value_mismatch"
   | "duplicate"
   | "gstin_mismatch"
-  | "date_mismatch";
+  | "date_mismatch"
+  | "fuzzy_match";
+
+export type ReviewStatus = "open" | "in_review" | "supplier_contacted" | "resolved" | "ignored";
 
 export type Discrepancy = {
   id: number;
@@ -72,9 +75,33 @@ export type Discrepancy = {
   statement_invoice: Invoice | null;
   detail: string;
   ai_explanation: string;
+  confidence_score: number;
+  risk_score: number;
+  risk_level: "low" | "medium" | "high";
   value_at_risk: string;
+  review_status: ReviewStatus;
+  resolution_note: string;
   resolved: boolean;
   created_at: string;
+  updated_at: string;
+};
+
+export type AuditEvent = {
+  id: number;
+  action: string;
+  detail: string;
+  actor_email: string;
+  created_at: string;
+};
+
+export type SupplierAnalytics = {
+  suppliers: Array<{
+    supplier_gstin: string;
+    supplier_name: string;
+    flagged_count: number;
+    high_risk_count: number;
+    itc_at_risk: number;
+  }>;
 };
 
 export type Paginated<T> = {
@@ -103,4 +130,5 @@ export const DISCREPANCY_LABELS: Record<DiscrepancyType, string> = {
   duplicate: "Duplicate",
   gstin_mismatch: "GSTIN Mismatch",
   date_mismatch: "Date Mismatch",
+  fuzzy_match: "Possible Fuzzy Match",
 };

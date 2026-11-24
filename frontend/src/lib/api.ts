@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+// Empty in Docker production: Next.js proxies same-origin /api requests to Django.
+// Keep NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 for local split-server development.
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 const ACCESS_KEY = "gstflow_access";
 const REFRESH_KEY = "gstflow_refresh";

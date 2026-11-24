@@ -30,7 +30,15 @@ TallyPrime, not a replacement for the GST portal/IMS.
   discrepancy, written for a non-accountant reader, generated after the
   engine has already decided the outcome (see [AI explanations](#ai-explanations)).
 - **Discrepancy review** — filterable, paginated discrepancy list per
-  reconciliation run, with a resolved/unresolved toggle.
+  reconciliation run, with review status, resolution notes, and an audit
+  history for every reviewer update.
+- **Confidence-scored fuzzy candidates** — unmatched invoices with highly
+  similar invoice numbers, GSTINs, values, and dates are proposed for human
+  review instead of being silently auto-matched.
+- **Risk prioritization and supplier analytics** — every discrepancy receives
+  a deterministic 0–100 risk score based on its type, tax exposure, and
+  confidence; the dashboard ranks suppliers by recurring exceptions and ITC
+  at risk.
 - **Dashboard** — totals for purchase/statement invoices, matched vs.
   flagged counts, ITC-at-risk value, and a breakdown by discrepancy type.
 - **Synthetic sample data generator** — a management command that produces
@@ -166,3 +174,82 @@ used as a guessing oracle.
 
 GSTR-1/3B draft generation, PAN/DOB-based password-guessing heuristics,
 multi-GSTIN/multi-PAN support, e-invoice/IRN handling, real GSTN API calls.
+
+## Production deployment with Docker
+
+The included Docker Compose stack starts a Next.js frontend, Django API,
+Celery worker, PostgreSQL, and Redis. The browser communicates with the API
+through the frontend's same-origin `/api` rewrite, so the API does not need a
+public port.
+
+### Before deployment
+
+1. Install Docker Engine with Docker Compose on the server.
+2. Point a DNS record at the server if you plan to use a domain and HTTPS.
+3. Copy the production template and replace every placeholder:
+
+```bash
+cp .env.production.example .env.production
+python -c "import secrets; print(secrets.token_urlsafe(64))"
+```
+
+Put the generated value in `SECRET_KEY`. Use a separate strong password for
+`DB_PASSWORD`. Set `DOMAIN`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, and
+`CSRF_TRUSTED_ORIGINS` to the final HTTPS domain. Never commit
+`.env.production`.
+
+### Start the stack
+
+For a server behind an existing HTTPS reverse proxy, configure the proxy to
+send traffic to `http://127.0.0.1:3000`, then run:
+
+```bash
+docker compose --env-file .env.production up --build -d
+```
+
+The frontend binds only to `127.0.0.1:3000` by default, so it is not exposed
+directly to the internet. Set `PUBLIC_PORT` in `.env.production` if your
+reverse proxy uses another local port.
+
+To use the included Caddy HTTPS proxy, ensure `DOMAIN` resolves to the server
+and ports 80 and 443 are open, then run:
+
+```bash
+docker compose --env-file .env.production --profile tls up --build -d
+```
+
+Caddy obtains and renews the TLS certificate automatically. With this option,
+visit `https://DOMAIN` and keep `FORCE_HTTPS=True`.
+
+For a temporary non-HTTPS local preview only, set `FORCE_HTTPS=False` and use
+an SSH tunnel or a local browser. Do not expose that configuration publicly.
+
+### Operational commands
+
+```bash
+# Follow application logs
+docker compose --env-file .env.production logs -f api worker frontend
+
+# Check containers
+docker compose --env-file .env.production ps
+
+# Apply a new version after pulling source changes
+docker compose --env-file .env.production up --build -d
+
+# Create an admin account
+docker compose --env-file .env.production exec api python manage.py createsuperuser
+```
+
+The API health endpoint is available internally at `/healthz/`. Database data
+is stored in the `postgres_data` Docker volume; back it up before upgrades or
+server changes. Redis intentionally does not persist uploaded file bytes,
+which keeps short-lived upload data from remaining on disk after a restart.
+
+### Deployment notes
+
+- Run `DEBUG=False` in production.
+- Use a fresh `GROQ_API_KEY`; if a key appeared in a screenshot or commit,
+  revoke it before deployment.
+- The frontend currently stores JWT tokens in browser local storage. For a
+  higher-security production deployment, the next security upgrade should be
+  httpOnly, secure cookie-based authentication.

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import RequireAuth from "@/components/RequireAuth";
 import { apiFetch } from "@/lib/api";
-import type { Dashboard } from "@/lib/types";
+import type { Dashboard, SupplierAnalytics } from "@/lib/types";
 import { DISCREPANCY_LABELS } from "@/lib/types";
 
 function Card({ label, value }: { label: string; value: string | number }) {
@@ -18,12 +18,14 @@ function Card({ label, value }: { label: string; value: string | number }) {
 
 function DashboardContent() {
   const [data, setData] = useState<Dashboard | null>(null);
+  const [suppliers, setSuppliers] = useState<SupplierAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     apiFetch<Dashboard>("/api/dashboard/")
       .then(setData)
       .catch(() => setError("Could not load dashboard."));
+    apiFetch<SupplierAnalytics>("/api/reconcile/suppliers/").then(setSuppliers).catch(() => undefined);
   }, []);
 
   if (error) return <p className="px-6 py-8 text-red-600">{error}</p>;
@@ -60,6 +62,39 @@ function DashboardContent() {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {suppliers && suppliers.suppliers.length > 0 && (
+        <div className="mt-8 border-t border-slate-200 pt-6">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="font-medium text-slate-900">Supplier risk watchlist</h2>
+            <span className="text-xs text-slate-500">Ranked by ITC at risk</span>
+          </div>
+          <div className="overflow-x-auto border border-slate-200 bg-white">
+            <table className="w-full min-w-[620px] text-left text-sm">
+              <thead className="bg-slate-100 text-xs uppercase text-slate-600">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Supplier</th>
+                  <th className="px-4 py-3 font-medium">GSTIN</th>
+                  <th className="px-4 py-3 text-right font-medium">Flags</th>
+                  <th className="px-4 py-3 text-right font-medium">High risk</th>
+                  <th className="px-4 py-3 text-right font-medium">ITC at risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.suppliers.map((supplier) => (
+                  <tr key={supplier.supplier_gstin} className="border-t border-slate-100 text-slate-700">
+                    <td className="px-4 py-3 font-medium text-slate-900">{supplier.supplier_name}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{supplier.supplier_gstin}</td>
+                    <td className="px-4 py-3 text-right">{supplier.flagged_count}</td>
+                    <td className="px-4 py-3 text-right">{supplier.high_risk_count}</td>
+                    <td className="px-4 py-3 text-right">₹{supplier.itc_at_risk.toLocaleString("en-IN")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

@@ -52,6 +52,13 @@ class BaseUploadView(APIView):
             f = request.FILES.get("file")
             if not f:
                 return Response({"detail": "No file provided."}, status=400)
+            if f.size > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
+                return Response(
+                    {"detail": f"File exceeds the {settings.MAX_UPLOAD_SIZE_MB} MB upload limit."},
+                    status=413,
+                )
+            if not f.name.lower().endswith((".csv", ".xlsx", ".xls", ".json")):
+                return Response({"detail": "Unsupported file type."}, status=400)
             file_bytes = f.read()
             filename = f.name
             upload_token = uuid.uuid4().hex

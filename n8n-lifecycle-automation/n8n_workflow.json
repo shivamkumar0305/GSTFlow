@@ -1,0 +1,281 @@
+{
+  "name": "Lifecycle Marketing - Stage-Based LLM Messaging (Cloud)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c2b2d2e2-0001-4b2b-9b2b-000000000001",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [220, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Events",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "c2b2d2e2-0002-4b2b-9b2b-000000000002",
+      "name": "Get Events (Google Sheets)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [440, 400],
+      "notes": "Replace YOUR_GOOGLE_SHEET_ID with your sheet's ID, and attach your Google Sheets OAuth2 credential."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ---------------------------------------------------------------------------\n// Classify each user into a funnel stage based on their MOST RECENT event.\n//\n// Input : one item per row from the \"Events\" Google Sheet\n//         -> { user_id, name, email, event_type, timestamp }\n// Output: one item per unique user_id -> adds a `stage` field\n// ---------------------------------------------------------------------------\n\n// Flatten incoming items down to plain event objects.\nconst events = items.map(item => item.json);\n\n// Track the latest-seen event per user_id.\n// Map key   -> user_id\n// Map value -> { user_id, name, email, latest_event, latestTime, timestamp }\nconst latestByUser = new Map();\n\nfor (const event of events) {\n  const { user_id, name, email, event_type, timestamp } = event;\n  const eventTime = new Date(timestamp).getTime();\n\n  const existing = latestByUser.get(user_id);\n\n  // Keep this row if it's the first event we've seen for this user,\n  // or if its timestamp is newer than what we currently have stored.\n  // This is the \"latest event wins\" rule.\n  if (!existing || eventTime > existing.latestTime) {\n    latestByUser.set(user_id, {\n      user_id,\n      name,\n      email,\n      latest_event: event_type,\n      latestTime: eventTime,\n      timestamp,\n    });\n  }\n}\n\n// Map a user's single most recent event type directly to a funnel stage.\n// Because we already reduced each user down to ONE (their latest) event,\n// this is a simple 1:1 lookup rather than a multi-condition rule set:\n//   - latest event is a fresh signup with nothing after it -> not_activated\n//   - latest event is first_generation (they tried the product, no payment yet) -> activated_not_paid\n//   - latest event is payment -> paid\n//   - latest event is inactive_3d (fired by a separate scheduled job\n//     whenever a user goes quiet for 3 days) -> at_risk, even if they had\n//     paid before - inactivity always takes priority as the most recent signal\nfunction classify(eventType) {\n  switch (eventType) {\n    case 'payment':\n      return 'paid';\n    case 'inactive_3d':\n      return 'at_risk';\n    case 'first_generation':\n      return 'activated_not_paid';\n    case 'signup':\n    default:\n      return 'not_activated';\n  }\n}\n\nconst results = [];\nfor (const user of latestByUser.values()) {\n  results.push({\n    json: {\n      user_id: user.user_id,\n      name: user.name,\n      email: user.email,\n      latest_event: user.latest_event,\n      timestamp: user.timestamp,\n      stage: classify(user.latest_event),\n    },\n  });\n}\n\nreturn results;"
+      },
+      "id": "c2b2d2e2-0003-4b2b-9b2b-000000000003",
+      "name": "Classify Users",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 400]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.stage }}",
+        "rules": {
+          "rules": [
+            { "value2": "not_activated" },
+            { "value2": "activated_not_paid" },
+            { "value2": "paid" },
+            { "value2": "at_risk" }
+          ]
+        },
+        "fallbackOutput": 4
+      },
+      "id": "c2b2d2e2-0004-4b2b-9b2b-000000000004",
+      "name": "Switch: Route by Stage",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [880, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"llama-3.3-70b-versatile\", messages: [ { role: \"system\", content: \"You are a friendly, upbeat lifecycle marketing copywriter for a B2C AI product. Write a short nudge encouraging the user to complete their first generation/try the core feature for the first time. Be warm and encouraging, not pushy. Include exactly one clear call to action. Keep it under 80 words. Do not use markdown formatting or a subject line, just the message body.\" }, { role: \"user\", content: \"Write a personalized activation nudge for \" + $json.name + \" (user_id: \" + $json.user_id + \"), who signed up but has not generated anything yet.\" } ] }) }}",
+        "options": {}
+      },
+      "id": "c2b2d2e2-0005-4b2b-9b2b-000000000005",
+      "name": "Groq: Not Activated Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"llama-3.3-70b-versatile\", messages: [ { role: \"system\", content: \"You are a friendly lifecycle marketing copywriter for a B2C AI product. Write a message to a user who has already tried the product (generated at least once) but has not upgraded to a paid plan. Remind them of the value they already got from their free generation, and give a soft, low-pressure nudge toward upgrading. Include exactly one clear call to action. Keep it under 80 words. Do not use markdown formatting or a subject line, just the message body.\" }, { role: \"user\", content: \"Write a personalized upgrade nudge for \" + $json.name + \" (user_id: \" + $json.user_id + \"), who has generated content but has not paid yet.\" } ] }) }}",
+        "options": {}
+      },
+      "id": "c2b2d2e2-0006-4b2b-9b2b-000000000006",
+      "name": "Groq: Activated Not Paid Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"llama-3.3-70b-versatile\", messages: [ { role: \"system\", content: \"You are a friendly lifecycle marketing copywriter for a B2C AI product. Write a short thank-you message to a user who just became a paying customer, and ask them to refer a friend. Be genuine and appreciative, not salesy. Include exactly one clear call to action (the referral ask). Keep it under 60 words. Do not use markdown formatting or a subject line, just the message body.\" }, { role: \"user\", content: \"Write a personalized thank-you and referral-ask message for \" + $json.name + \" (user_id: \" + $json.user_id + \"), who just paid for the product.\" } ] }) }}",
+        "options": {}
+      },
+      "id": "c2b2d2e2-0007-4b2b-9b2b-000000000007",
+      "name": "Groq: Paid Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"llama-3.3-70b-versatile\", messages: [ { role: \"system\", content: \"You are a friendly lifecycle marketing copywriter for a B2C AI product. Write a low-pressure win-back message to a user who has gone quiet for 3+ days. Do not guilt-trip them. Gently remind them what they can do with the product and invite them back with exactly one clear, easy call to action. Keep it under 80 words. Do not use markdown formatting or a subject line, just the message body.\" }, { role: \"user\", content: \"Write a personalized win-back message for \" + $json.name + \" (user_id: \" + $json.user_id + \"), who has been inactive for 3 days.\" } ] }) }}",
+        "options": {}
+      },
+      "id": "c2b2d2e2-0008-4b2b-9b2b-000000000008",
+      "name": "Groq: At Risk Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 660]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 4
+      },
+      "id": "c2b2d2e2-0009-4b2b-9b2b-000000000009",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1400, 400]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// ---------------------------------------------------------------------------\n// Format the final log row for this user.\n//\n// The Classify Users node is looked up directly (rather than reading\n// $json) because $json at this point holds this branch's Groq API\n// response, not the original user record. n8n keeps the item-pairing\n// intact across Switch/HTTP Request/Merge as long as item count per\n// branch doesn't change, so $('Classify Users').item resolves to the\n// same user this Groq response belongs to.\n// ---------------------------------------------------------------------------\nconst original = $('Classify Users').item.json;\nconst groqResponse = $json;\n\nconst generatedMessage = groqResponse.choices[0].message.content.trim();\n\nreturn {\n  json: {\n    user_id: original.user_id,\n    stage: original.stage,\n    generated_message: generatedMessage,\n    timestamp: new Date().toISOString(),\n  },\n};"
+      },
+      "id": "c2b2d2e2-0010-4b2b-9b2b-000000000010",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1620, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Results",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $json.user_id }}",
+            "stage": "={{ $json.stage }}",
+            "generated_message": "={{ $json.generated_message }}",
+            "timestamp": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "user_id", "displayName": "user_id", "type": "string", "required": false, "display": true, "defaultMatch": false, "canBeUsedToMatch": true },
+            { "id": "stage", "displayName": "stage", "type": "string", "required": false, "display": true, "defaultMatch": false, "canBeUsedToMatch": true },
+            { "id": "generated_message", "displayName": "generated_message", "type": "string", "required": false, "display": true, "defaultMatch": false, "canBeUsedToMatch": true },
+            { "id": "timestamp", "displayName": "timestamp", "type": "string", "required": false, "display": true, "defaultMatch": false, "canBeUsedToMatch": true }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2b2d2e2-0011-4b2b-9b2b-000000000011",
+      "name": "Append Results (Google Sheets)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1840, 400],
+      "notes": "Replace YOUR_GOOGLE_SHEET_ID with your sheet's ID, and attach your Google Sheets OAuth2 credential. After connecting the credential, click into the Columns field once to let n8n refresh the live column list from your 'Results' tab."
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Get Events (Google Sheets)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Events (Google Sheets)": {
+      "main": [
+        [{ "node": "Classify Users", "type": "main", "index": 0 }]
+      ]
+    },
+    "Classify Users": {
+      "main": [
+        [{ "node": "Switch: Route by Stage", "type": "main", "index": 0 }]
+      ]
+    },
+    "Switch: Route by Stage": {
+      "main": [
+        [{ "node": "Groq: Not Activated Message", "type": "main", "index": 0 }],
+        [{ "node": "Groq: Activated Not Paid Message", "type": "main", "index": 0 }],
+        [{ "node": "Groq: Paid Message", "type": "main", "index": 0 }],
+        [{ "node": "Groq: At Risk Message", "type": "main", "index": 0 }]
+      ]
+    },
+    "Groq: Not Activated Message": {
+      "main": [
+        [{ "node": "Merge", "type": "main", "index": 0 }]
+      ]
+    },
+    "Groq: Activated Not Paid Message": {
+      "main": [
+        [{ "node": "Merge", "type": "main", "index": 1 }]
+      ]
+    },
+    "Groq: Paid Message": {
+      "main": [
+        [{ "node": "Merge", "type": "main", "index": 2 }]
+      ]
+    },
+    "Groq: At Risk Message": {
+      "main": [
+        [{ "node": "Merge", "type": "main", "index": 3 }]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [{ "node": "Format Output", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Output": {
+      "main": [
+        [{ "node": "Append Results (Google Sheets)", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "lifecycle-marketing-demo-cloud"
+  }
+}
