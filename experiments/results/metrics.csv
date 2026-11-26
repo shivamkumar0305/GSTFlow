@@ -1,0 +1,145 @@
+method,scope,TP,FP,FN,TN,precision,recall,F1,false_positive_rate,candidate_volume,candidate_generation_recall
+Exact-only,overall,650,25,200,949125,0.9629629629629629,0.7647058823529411,0.8524590163934426,2.6339356266132856e-05,675,0.7647058823529411
+Exact-only,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Exact-only,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Exact-only,invoice_number_typo,0,0,150,22350,0.0,0.0,0.0,0.0,0,0.0
+Exact-only,gstin_typo,0,0,50,2450,0.0,0.0,0.0,0.0,0,0.0
+Exact-only,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Exact-only,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Exact-only,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Exact-only,missing_side,0,0,0,2500,0.0,0.0,0.0,0.0,0,0.0
+Exact-only,hard_negative,0,25,0,2475,0.0,0.0,0.0,0.01,25,0.0
+Exact-only,cross_scenario,0,0,0,740000,0.0,0.0,0.0,0.0,0,0.0
+Exact-only,macro_supported_scenarios,,,,,0.7142857142857143,0.7142857142857143,0.7142857142857143,0.0,,0.7142857142857143
+Hybrid engine (threshold 80),overall,841,56,9,949094,0.9375696767001115,0.9894117647058823,0.9627933600457927,5.90001580361376e-05,1591,1.0
+Hybrid engine (threshold 80),clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid engine (threshold 80),case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid engine (threshold 80),invoice_number_typo,141,0,9,22350,1.0,0.94,0.9690721649484536,0.0,364,1.0
+Hybrid engine (threshold 80),gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid engine (threshold 80),value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid engine (threshold 80),date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid engine (threshold 80),duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid engine (threshold 80),missing_side,0,15,0,2485,0.0,0.0,0.0,0.006,32,0.0
+Hybrid engine (threshold 80),hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Hybrid engine (threshold 80),cross_scenario,0,15,0,739985,0.0,0.0,0.0,2.027027027027027e-05,453,0.0
+Hybrid engine (threshold 80),macro_supported_scenarios,,,,,1.0,0.9914285714285713,0.9955817378497791,0.0,,1.0
+Hybrid sweep threshold=70,overall,828,82,22,949068,0.9098901098901099,0.9741176470588235,0.940909090909091,8.639308855291577e-05,1591,1.0
+Hybrid sweep threshold=70,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid sweep threshold=70,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid sweep threshold=70,invoice_number_typo,128,1,22,22349,0.9922480620155039,0.8533333333333334,0.9175627240143369,4.47427293064877e-05,364,1.0
+Hybrid sweep threshold=70,gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid sweep threshold=70,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=70,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=70,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=70,missing_side,0,19,0,2481,0.0,0.0,0.0,0.0076,32,0.0
+Hybrid sweep threshold=70,hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Hybrid sweep threshold=70,cross_scenario,0,36,0,739964,0.0,0.0,0.0,4.864864864864865e-05,453,0.0
+Hybrid sweep threshold=70,macro_supported_scenarios,,,,,0.9988925802879292,0.979047619047619,0.9882232462877624,6.391818472355386e-06,,1.0
+Hybrid sweep threshold=75,overall,833,73,17,949077,0.9194260485651214,0.98,0.9487471526195901,7.691092029710794e-05,1591,1.0
+Hybrid sweep threshold=75,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid sweep threshold=75,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid sweep threshold=75,invoice_number_typo,133,1,17,22349,0.9925373134328358,0.8866666666666667,0.9366197183098592,4.47427293064877e-05,364,1.0
+Hybrid sweep threshold=75,gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid sweep threshold=75,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=75,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=75,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=75,missing_side,0,17,0,2483,0.0,0.0,0.0,0.0068,32,0.0
+Hybrid sweep threshold=75,hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Hybrid sweep threshold=75,cross_scenario,0,29,0,739971,0.0,0.0,0.0,3.918918918918919e-05,453,0.0
+Hybrid sweep threshold=75,macro_supported_scenarios,,,,,0.9989339019189766,0.9838095238095238,0.9909456740442656,6.391818472355386e-06,,1.0
+Hybrid sweep threshold=80,overall,841,56,9,949094,0.9375696767001115,0.9894117647058823,0.9627933600457927,5.90001580361376e-05,1591,1.0
+Hybrid sweep threshold=80,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid sweep threshold=80,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid sweep threshold=80,invoice_number_typo,141,0,9,22350,1.0,0.94,0.9690721649484536,0.0,364,1.0
+Hybrid sweep threshold=80,gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid sweep threshold=80,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=80,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=80,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=80,missing_side,0,15,0,2485,0.0,0.0,0.0,0.006,32,0.0
+Hybrid sweep threshold=80,hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Hybrid sweep threshold=80,cross_scenario,0,15,0,739985,0.0,0.0,0.0,2.027027027027027e-05,453,0.0
+Hybrid sweep threshold=80,macro_supported_scenarios,,,,,1.0,0.9914285714285713,0.9955817378497791,0.0,,1.0
+Hybrid sweep threshold=85,overall,847,39,3,949111,0.9559819413092551,0.9964705882352941,0.9758064516129032,4.1089395775167256e-05,1591,1.0
+Hybrid sweep threshold=85,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid sweep threshold=85,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid sweep threshold=85,invoice_number_typo,147,0,3,22350,1.0,0.98,0.98989898989899,0.0,364,1.0
+Hybrid sweep threshold=85,gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid sweep threshold=85,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=85,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=85,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=85,missing_side,0,7,0,2493,0.0,0.0,0.0,0.0028,32,0.0
+Hybrid sweep threshold=85,hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Hybrid sweep threshold=85,cross_scenario,0,6,0,739994,0.0,0.0,0.0,8.108108108108107e-06,453,0.0
+Hybrid sweep threshold=85,macro_supported_scenarios,,,,,1.0,0.9971428571428572,0.9985569985569985,0.0,,1.0
+Hybrid sweep threshold=90,overall,850,28,0,949122,0.9681093394077449,1.0,0.9837962962962963,2.95000790180688e-05,1591,1.0
+Hybrid sweep threshold=90,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid sweep threshold=90,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid sweep threshold=90,invoice_number_typo,150,0,0,22350,1.0,1.0,1.0,0.0,364,1.0
+Hybrid sweep threshold=90,gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid sweep threshold=90,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=90,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=90,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=90,missing_side,0,3,0,2497,0.0,0.0,0.0,0.0012,32,0.0
+Hybrid sweep threshold=90,hard_negative,0,25,0,2475,0.0,0.0,0.0,0.01,26,0.0
+Hybrid sweep threshold=90,cross_scenario,0,0,0,740000,0.0,0.0,0.0,0.0,453,0.0
+Hybrid sweep threshold=90,macro_supported_scenarios,,,,,1.0,1.0,1.0,0.0,,1.0
+Hybrid sweep threshold=95,overall,813,25,37,949125,0.9701670644391408,0.9564705882352941,0.9632701421800948,2.6339356266132856e-05,1591,1.0
+Hybrid sweep threshold=95,clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Hybrid sweep threshold=95,case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Hybrid sweep threshold=95,invoice_number_typo,113,0,37,22350,1.0,0.7533333333333333,0.8593155893536121,0.0,364,1.0
+Hybrid sweep threshold=95,gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Hybrid sweep threshold=95,value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=95,date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=95,duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Hybrid sweep threshold=95,missing_side,0,0,0,2500,0.0,0.0,0.0,0.0,32,0.0
+Hybrid sweep threshold=95,hard_negative,0,25,0,2475,0.0,0.0,0.0,0.01,26,0.0
+Hybrid sweep threshold=95,cross_scenario,0,0,0,740000,0.0,0.0,0.0,0.0,453,0.0
+Hybrid sweep threshold=95,macro_supported_scenarios,,,,,1.0,0.9647619047619047,0.979902227050516,0.0,,1.0
+Ablation remove invoice (renormalized),overall,840,43,10,949107,0.9513023782559457,0.9882352941176471,0.9694171956145412,4.5303692777748515e-05,1591,1.0
+Ablation remove invoice (renormalized),clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Ablation remove invoice (renormalized),case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Ablation remove invoice (renormalized),invoice_number_typo,140,0,10,22350,1.0,0.9333333333333333,0.9655172413793104,0.0,364,1.0
+Ablation remove invoice (renormalized),gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Ablation remove invoice (renormalized),value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove invoice (renormalized),date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove invoice (renormalized),duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove invoice (renormalized),missing_side,0,5,0,2495,0.0,0.0,0.0,0.002,32,0.0
+Ablation remove invoice (renormalized),hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Ablation remove invoice (renormalized),cross_scenario,0,12,0,739988,0.0,0.0,0.0,1.6216216216216215e-05,453,0.0
+Ablation remove invoice (renormalized),macro_supported_scenarios,,,,,1.0,0.9904761904761905,0.9950738916256158,0.0,,1.0
+Ablation remove gstin (renormalized),overall,845,44,5,949106,0.9505061867266592,0.9941176470588236,0.9718228867165037,4.6357267028393826e-05,1591,1.0
+Ablation remove gstin (renormalized),clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Ablation remove gstin (renormalized),case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Ablation remove gstin (renormalized),invoice_number_typo,145,0,5,22350,1.0,0.9666666666666667,0.983050847457627,0.0,364,1.0
+Ablation remove gstin (renormalized),gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Ablation remove gstin (renormalized),value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove gstin (renormalized),date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove gstin (renormalized),duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove gstin (renormalized),missing_side,0,10,0,2490,0.0,0.0,0.0,0.004,32,0.0
+Ablation remove gstin (renormalized),hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Ablation remove gstin (renormalized),cross_scenario,0,8,0,739992,0.0,0.0,0.0,1.081081081081081e-05,453,0.0
+Ablation remove gstin (renormalized),macro_supported_scenarios,,,,,1.0,0.9952380952380953,0.9975786924939467,0.0,,1.0
+Ablation remove value (renormalized),overall,828,79,22,949071,0.9128996692392503,0.9741176470588235,0.9425156516789983,8.323236580097983e-05,1591,1.0
+Ablation remove value (renormalized),clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Ablation remove value (renormalized),case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Ablation remove value (renormalized),invoice_number_typo,128,3,22,22347,0.9770992366412213,0.8533333333333334,0.911032028469751,0.00013422818791946307,364,1.0
+Ablation remove value (renormalized),gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Ablation remove value (renormalized),value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove value (renormalized),date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove value (renormalized),duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove value (renormalized),missing_side,0,21,0,2479,0.0,0.0,0.0,0.0084,32,0.0
+Ablation remove value (renormalized),hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Ablation remove value (renormalized),cross_scenario,0,29,0,739971,0.0,0.0,0.0,3.918918918918919e-05,453,0.0
+Ablation remove value (renormalized),macro_supported_scenarios,,,,,0.9967284623773173,0.979047619047619,0.987290289781393,1.9175455417066155e-05,,1.0
+Ablation remove date (renormalized),overall,828,75,22,949075,0.9169435215946844,0.9741176470588235,0.9446662863662294,7.901806879839857e-05,1591,1.0
+Ablation remove date (renormalized),clean_match,400,0,0,159600,1.0,1.0,1.0,0.0,400,1.0
+Ablation remove date (renormalized),case_punctuation_only,100,0,0,9900,1.0,1.0,1.0,0.0,100,1.0
+Ablation remove date (renormalized),invoice_number_typo,128,1,22,22349,0.9922480620155039,0.8533333333333334,0.9175627240143369,4.47427293064877e-05,364,1.0
+Ablation remove date (renormalized),gstin_typo,50,0,0,2450,1.0,1.0,1.0,0.0,66,1.0
+Ablation remove date (renormalized),value_difference,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove date (renormalized),date_shift,50,0,0,2450,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove date (renormalized),duplicate_within_file,50,0,0,4950,1.0,1.0,1.0,0.0,50,1.0
+Ablation remove date (renormalized),missing_side,0,15,0,2485,0.0,0.0,0.0,0.006,32,0.0
+Ablation remove date (renormalized),hard_negative,0,26,0,2474,0.0,0.0,0.0,0.0104,26,0.0
+Ablation remove date (renormalized),cross_scenario,0,33,0,739967,0.0,0.0,0.0,4.4594594594594596e-05,453,0.0
+Ablation remove date (renormalized),macro_supported_scenarios,,,,,0.9988925802879292,0.979047619047619,0.9882232462877624,6.391818472355386e-06,,1.0

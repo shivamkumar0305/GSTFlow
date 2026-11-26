@@ -167,11 +167,11 @@ if CELERY_TASK_ALWAYS_EAGER:
     CELERY_BROKER_URL = "memory://"
     CELERY_RESULT_BACKEND = "cache+memory://"
 else:
-    CELERY_BROKER_URL = os.environ.get(
+    CEvLERY_BROKER_URL = os.environ.get(
         "CELERY_BROKER_URL", os.environ.get("REDIS_URL", "redis://localhost:6379/0")
     )
     CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
-
+q
 # --- Cache configuration ---
 # If Redis is configured (via REDIS_CACHE_URL or REDIS_URL), use RedisCache.
 # Otherwise, fall back to FileBasedCache so all Gunicorn workers share the cache

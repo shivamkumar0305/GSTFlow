@@ -1,0 +1,38 @@
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/shivam/.cache/fontconfig
+	/Users/shivam/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/shivam/.cache/fontconfig
+	/Users/shivam/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/shivam/.cache/fontconfig
+	/Users/shivam/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/shivam/.cache/fontconfig
+	/Users/shivam/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/shivam/.cache/fontconfig
+	/Users/shivam/.fontconfig
+Matplotlib is building the font cache; this may take a moment.
+Traceback (most recent call last):
+  File "/Users/shivam/Documents/gstflow-minor-project/experiments/run.py", line 463, in <module>
+    main()
+    ~~~~^^
+  File "/Users/shivam/Documents/gstflow-minor-project/experiments/run.py", line 429, in main
+    results = configurable_reconcile(engine_records(books), engine_records(stmts), 80, weights)
+  File "/Users/shivam/Documents/gstflow-minor-project/experiments/run.py", line 145, in configurable_reconcile
+    confidence = score_variant(b, s, weights)
+  File "/Users/shivam/Documents/gstflow-minor-project/experiments/run.py", line 78, in score_variant
+    return round(inv * weights["invoice"] + gst * weights["gstin"] + val * weights["value"] + (weights["date"] if same_date else 0))
+                       ~~~~~~~^^^^^^^^^^^
+KeyError: 'invoice'

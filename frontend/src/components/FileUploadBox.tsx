@@ -106,13 +106,15 @@ export default function FileUploadBox({ title, description, uploadPath, period, 
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5">
-      <h3 className="font-medium">{title}</h3>
-      <p className="mt-1 text-sm text-slate-500">{description}</p>
+    <section className="upload-card">
+      <h3 className="text-base font-bold text-[#173a60]">{title}</h3>
+      <p className="mt-1 text-sm leading-5 text-slate-600">{description}</p>
 
       {phase === "idle" && (
-        <label className="mt-4 block cursor-pointer rounded-md border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500 hover:border-slate-400">
-          Click to choose a CSV / XLSX / JSON file
+        <label className="drop-zone cursor-pointer">
+          <span className="mb-2 block text-2xl text-[#315f8a]" aria-hidden="true">↑</span>
+          Choose a file to upload
+          <span className="mt-1 block text-xs text-slate-500">CSV · XLSX · JSON</span>
           <input
             ref={fileInputRef}
             type="file"
@@ -124,14 +126,14 @@ export default function FileUploadBox({ title, description, uploadPath, period, 
       )}
 
       {(phase === "uploading" || phase === "processing") && (
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="status-banner mt-4">
           {filename} — {phase === "uploading" ? "uploading..." : "processing..."}
         </p>
       )}
 
       {phase === "needs_password" && (
         <form onSubmit={handlePasswordSubmit} className="mt-4 flex flex-col gap-2">
-          <p className="text-sm text-amber-700">
+          <p className="status-banner warning">
             {filename} is password-protected. Enter the password to continue.
           </p>
           <div className="flex gap-2">
@@ -140,12 +142,12 @@ export default function FileUploadBox({ title, description, uploadPath, period, 
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="portal-input min-w-0 flex-1 text-sm"
               placeholder="File password"
             />
             <button
               type="submit"
-              className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white"
+              className="primary-button"
             >
               Unlock
             </button>
@@ -154,11 +156,11 @@ export default function FileUploadBox({ title, description, uploadPath, period, 
       )}
 
       {phase === "done" && batch && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <p className="text-green-700">
+        <div className="status-banner success mt-4 flex items-center justify-between gap-3">
+          <p>
             {batch.original_filename} — {batch.row_count} rows loaded
           </p>
-          <button onClick={reset} className="text-slate-500 underline">
+          <button onClick={reset} className="font-semibold underline">
             Replace
           </button>
         </div>
@@ -166,12 +168,12 @@ export default function FileUploadBox({ title, description, uploadPath, period, 
 
       {phase === "failed" && (
         <div className="mt-4 flex flex-col gap-2">
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="status-banner error">{error}</p>
           <button onClick={reset} className="self-start text-sm text-slate-500 underline">
             Try again
           </button>
         </div>
       )}
-    </div>
+    </section>
   );
 }

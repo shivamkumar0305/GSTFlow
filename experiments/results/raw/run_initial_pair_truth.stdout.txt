@@ -1,0 +1,16 @@
+seed=42 engine_commit=17b53f231f038b8e626fad76f01a0a4902f16371 books=1000 statement=950 truth_pairs=900
+Exact-only: TP=660 FP=25 FN=240 TN=949075 P=0.963504 R=0.733333 F1=0.832808 candidates=685 candidate_recall=0.733333
+Hybrid engine (threshold 80): TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Hybrid sweep threshold=70: TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Hybrid sweep threshold=75: TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Hybrid sweep threshold=80: TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Hybrid sweep threshold=85: TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Hybrid sweep threshold=90: TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Hybrid sweep threshold=95: TP=823 FP=25 FN=77 TN=949075 P=0.970519 R=0.914444 F1=0.941648 candidates=875 candidate_recall=0.944444
+Ablation remove invoice (renormalized): TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Ablation remove gstin (renormalized): TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Ablation remove value (renormalized): TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+Ablation remove date (renormalized): TP=850 FP=25 FN=50 TN=949075 P=0.971429 R=0.944444 F1=0.957746 candidates=875 candidate_recall=0.944444
+order_shuffles_changed=20/20 symmetric_difference_total=1028
+false_positive_examples=25 false_negative_examples=30
+fellegi_sunter=not_run results=/Users/shivam/Documents/gstflow-minor-project/experiments/results

@@ -99,55 +99,61 @@ function RunDetail({ runId }: { runId: string }) {
     setAuditEvents((current) => ({ ...current, [d.id]: events.results }));
   }
 
-  if (!run) return <p className="px-6 py-8 text-slate-500">Loading...</p>;
+  if (!run) return <div className="portal-page"><p className="status-banner">Loading reconciliation run…</p></div>;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <h1 className="text-2xl font-semibold">Reconciliation Run #{run.id}</h1>
-      <p className="mt-1 text-sm text-slate-500">Period: {run.period || "—"}</p>
+    <div className="portal-page">
+      <div className="page-heading">
+        <div>
+          <p className="page-eyebrow">GSTFlow / Comparison record</p>
+          <h1>Reconciliation run #{run.id}</h1>
+          <p>Return period: {run.period || "Not specified"} · Status: {run.status}</p>
+        </div>
+      </div>
 
       {run.status === "processing" && (
-        <p className="mt-4 text-slate-500">Reconciling... this updates automatically.</p>
+        <p className="status-banner mb-5">Comparing invoice records. This page updates automatically.</p>
       )}
       {run.status === "failed" && (
-        <p className="mt-4 text-red-600">Reconciliation failed: {run.error_message}</p>
+        <p className="status-banner error mb-5">Reconciliation failed: {run.error_message}</p>
       )}
 
       {run.status === "done" && (
         <>
-          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
             <StatCard label="Books invoices" value={run.total_books_invoices} />
             <StatCard label="2A/2B invoices" value={run.total_statement_invoices} />
             <StatCard label="Matched" value={run.matched_count} />
             <StatCard label="Flagged" value={run.flagged_count} />
           </div>
           <div className="mt-4">
-            <StatCard label="ITC at risk (₹)" value={Number(run.itc_at_risk_value).toLocaleString("en-IN")} />
+            <StatCard label="Tax amount linked to flagged records (₹)" value={Number(run.itc_at_risk_value).toLocaleString("en-IN")} />
           </div>
+          <p className="mb-5 text-xs text-slate-500">Tax amount is a review-priority indicator; it is not a determination of ITC eligibility.</p>
 
-          <div className="mt-8 flex flex-wrap gap-2">
+          <section className="portal-panel mb-5">
+          <h2 className="section-heading"><span>Filter exceptions</span></h2>
+          <div className="flex flex-wrap gap-2">
             {TYPE_FILTERS.map((t) => (
               <button
                 key={t}
                 onClick={() => setFilter(t)}
-                className={`rounded-full px-3 py-1 text-sm ${
-                  filter === t
-                    ? "bg-slate-900 text-white"
-                    : "bg-white text-slate-600 border border-slate-300"
-                }`}
+                aria-pressed={filter === t}
+                className="filter-chip"
               >
                 {t === "all" ? "All" : DISCREPANCY_LABELS[t]}
               </button>
             ))}
           </div>
+          </section>
 
-          <div className="mt-4 flex flex-col gap-3">
-            {loadingList && <p className="text-sm text-slate-500">Loading...</p>}
+          <div className="flex flex-col gap-4">
+            {loadingList && <p className="status-banner">Loading exception records…</p>}
             {!loadingList && discrepancies.length === 0 && (
-              <p className="text-sm text-slate-500">No discrepancies of this type.</p>
+              <p className="status-banner success">No exceptions in this category.</p>
             )}
             {discrepancies.map((d) => (
-              <div key={d.id} className="border border-slate-200 bg-white p-4">
+              <article key={d.id} className={`exception-card ${d.risk_level === "high" ? "risk-high" : d.risk_level === "low" ? "risk-low" : ""}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
@@ -158,7 +164,7 @@ function RunDetail({ runId }: { runId: string }) {
                       {" — "}
                       {d.books_invoice?.supplier_gstin || d.statement_invoice?.supplier_gstin}
                     </p>
-                    <p className="mt-1 text-sm text-slate-600">{d.ai_explanation || d.detail}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-700">{d.ai_explanation || d.detail}</p>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                       <span className={`rounded-full px-2 py-0.5 font-medium ${
                         d.risk_level === "high"
@@ -185,23 +191,23 @@ function RunDetail({ runId }: { runId: string }) {
                     aria-label="Review status"
                     value={d.review_status}
                     onChange={(event) => void updateReview(d, event.target.value as ReviewStatus)}
-                    className="shrink-0 border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700"
+                    className="portal-input shrink-0 py-1.5 text-xs"
                   >
                     {Object.entries(REVIEW_STATUS_LABELS).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
                     ))}
                   </select>
                 </div>
-                <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row">
+                <div className="mt-4 flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row">
                   <input
                     value={notes[d.id] ?? d.resolution_note}
                     onChange={(event) => setNotes((current) => ({ ...current, [d.id]: event.target.value }))}
                     placeholder="Add a review note"
-                    className="min-w-0 flex-1 border border-slate-300 px-2 py-1.5 text-xs"
+                    className="portal-input min-w-0 flex-1 text-xs"
                   />
                   <button
                     onClick={() => void updateReview(d, d.review_status)}
-                    className="border border-slate-300 px-3 py-1.5 text-xs text-slate-700"
+                    className="secondary-button text-xs"
                   >
                     Save note
                   </button>
@@ -210,7 +216,7 @@ function RunDetail({ runId }: { runId: string }) {
                   </button>
                 </div>
                 {auditEvents[d.id] && (
-                  <ul className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                    <ul className="mt-3 border-t border-slate-200 pt-3 text-xs text-slate-600">
                     {auditEvents[d.id].length === 0 ? (
                       <li>No review activity yet.</li>
                     ) : auditEvents[d.id].map((event) => (
@@ -220,7 +226,7 @@ function RunDetail({ runId }: { runId: string }) {
                     ))}
                   </ul>
                 )}
-              </div>
+              </article>
             ))}
           </div>
         </>
@@ -231,9 +237,9 @@ function RunDetail({ runId }: { runId: string }) {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5">
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-slate-900">{value}</p>
+    <div className="metric-card">
+      <p className="metric-label">{label}</p>
+      <p className="metric-value">{value}</p>
     </div>
   );
 }

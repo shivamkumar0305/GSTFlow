@@ -5,16 +5,22 @@ import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
   title: "GSTFlow",
-  description: "AI-assisted GST invoice reconciliation",
+  description: "GSTFlow student project for GST invoice reconciliation and exception review",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
+      <body className="min-h-full flex flex-col text-slate-900">
         <AuthProvider>
           <NavBar />
           <main className="flex-1">{children}</main>
+          <footer className="portal-footer">
+            <div className="portal-footer-inner">
+              <span>GSTFlow · Student project prototype</span>
+              <span>Not connected to GSTN · Does not file returns or determine ITC eligibility</span>
+            </div>
+          </footer>
         </AuthProvider>
       </body>
     </html>

@@ -35,49 +35,51 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 px-6 py-16">
-      <h1 className="text-2xl font-semibold">Register your business</h1>
+    <div className="auth-shell">
+      <p className="page-eyebrow">New workspace</p>
+      <h1>Register your business</h1>
+      <p className="auth-intro">Create a project workspace to upload and compare invoice files.</p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           Business name
           <input
             required
             value={form.business_name}
             onChange={(e) => update("business_name", e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="portal-input"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           GSTIN
           <input
             required
             maxLength={15}
             value={form.gstin}
             onChange={(e) => update("gstin", e.target.value.toUpperCase())}
-            className="rounded-md border border-slate-300 px-3 py-2 uppercase"
+            className="portal-input uppercase"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           PAN
           <input
             required
             maxLength={10}
             value={form.pan}
             onChange={(e) => update("pan", e.target.value.toUpperCase())}
-            className="rounded-md border border-slate-300 px-3 py-2 uppercase"
+            className="portal-input uppercase"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           Email
           <input
             type="email"
             required
             value={form.email}
             onChange={(e) => update("email", e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="portal-input"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           Password
           <input
             type="password"
@@ -85,21 +87,21 @@ export default function RegisterPage() {
             minLength={8}
             value={form.password}
             onChange={(e) => update("password", e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="portal-input"
           />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="status-banner error">{error}</p>}
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+          className="primary-button disabled:opacity-50"
         >
-          {busy ? "Creating account..." : "Create account"}
+          {busy ? "Creating account…" : "Create business account"}
         </button>
       </form>
       <p className="text-sm text-slate-600">
         Already have an account?{" "}
-        <Link href="/login" className="text-slate-900 underline">
+        <Link href="/login" className="font-semibold text-[#173e66] underline">
           Log in
         </Link>
       </p>

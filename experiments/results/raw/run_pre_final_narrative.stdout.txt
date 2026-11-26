@@ -1,0 +1,17 @@
+seed=42 engine_commit=17b53f231f038b8e626fad76f01a0a4902f16371 books=1000 statement=950 truth_pairs=850
+Exact-only: TP=661 FP=25 FN=189 TN=949125 P=0.963557 R=0.777647 F1=0.860677 candidates=686 candidate_recall=0.777647
+Hybrid engine (threshold 80): TP=838 FP=65 FN=12 TN=949085 P=0.928018 R=0.985882 F1=0.956075 candidates=1528 candidate_recall=1.000000
+Hybrid sweep threshold=70: TP=830 FP=80 FN=20 TN=949070 P=0.912088 R=0.976471 F1=0.943182 candidates=1528 candidate_recall=1.000000
+Hybrid sweep threshold=75: TP=832 FP=76 FN=18 TN=949074 P=0.916300 R=0.978824 F1=0.946530 candidates=1528 candidate_recall=1.000000
+Hybrid sweep threshold=80: TP=838 FP=65 FN=12 TN=949085 P=0.928018 R=0.985882 F1=0.956075 candidates=1528 candidate_recall=1.000000
+Hybrid sweep threshold=85: TP=847 FP=43 FN=3 TN=949107 P=0.951685 R=0.996471 F1=0.973563 candidates=1528 candidate_recall=1.000000
+Hybrid sweep threshold=90: TP=850 FP=27 FN=0 TN=949123 P=0.969213 R=1.000000 F1=0.984366 candidates=1528 candidate_recall=1.000000
+Hybrid sweep threshold=95: TP=824 FP=25 FN=26 TN=949125 P=0.970554 R=0.969412 F1=0.969982 candidates=1528 candidate_recall=1.000000
+Ablation remove invoice (renormalized): TP=841 FP=46 FN=9 TN=949104 P=0.948140 R=0.989412 F1=0.968336 candidates=1528 candidate_recall=1.000000
+Ablation remove gstin (renormalized): TP=846 FP=46 FN=4 TN=949104 P=0.948430 R=0.995294 F1=0.971297 candidates=1528 candidate_recall=1.000000
+Ablation remove value (renormalized): TP=831 FP=78 FN=19 TN=949072 P=0.914191 R=0.977647 F1=0.944855 candidates=1528 candidate_recall=1.000000
+Ablation remove date (renormalized): TP=829 FP=78 FN=21 TN=949072 P=0.914002 R=0.975294 F1=0.943654 candidates=1528 candidate_recall=1.000000
+fuzzy_order_shuffles_changed=0/20 fuzzy_symmetric_difference_total=0
+all_pair_order_shuffles_changed=20/20 all_pair_symmetric_difference_total=1018
+false_positive_examples=30 false_negative_examples=12
+fellegi_sunter=not_run results=/Users/shivam/Documents/gstflow-minor-project/experiments/results

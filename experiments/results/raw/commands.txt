@@ -1,0 +1,33 @@
+Working directory: /Users/shivam/Documents/gstflow-minor-project
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/generate.py --seed 42 --n 1000 --output experiments/results > experiments/results/raw/generate.stdout.txt 2> experiments/results/raw/generate.stderr.txt
+
+The generator command was rerun after refining the benchmark to reuse 100 vendors for sequential invoice collision coverage; the first run logs are preserved as generate_initial_unique_suppliers.*.
+
+The generator command was run again after requiring transposition edits to actually change adjacent characters; prior output is preserved as generate_pre_transposition_fix.*.
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/generate.py --seed 42 --n 1000 --output experiments/results > experiments/results/raw/generate.stdout.txt 2> experiments/results/raw/generate.stderr.txt
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/run.py --data-dir experiments/results --out experiments/results > experiments/results/raw/run.stdout.txt 2> experiments/results/raw/run.stderr.txt
+
+After finalizing narrative interpretation and adding examples of the observed duplicate representative changes, the same runner command was executed again. Previous output is preserved as run_pre_final_narrative.*; current raw output corresponds to the final RESULTS.md and CSV artifacts.
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/run.py --data-dir experiments/results --out experiments/results > experiments/results/raw/run.stdout.txt 2> experiments/results/raw/run.stderr.txt
+
+The runner command was executed once more after adding complete error-cause counts; the prior output is preserved as run_pre_error_cause_counts.*.
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/run.py --data-dir experiments/results --out experiments/results > experiments/results/raw/run.stdout.txt 2> experiments/results/raw/run.stderr.txt
+
+After correcting a narrative sentence to read the best threshold's false-positive count from measured results, the same runner command was rerun. Previous stdout/stderr are preserved as run_pre_best_threshold_text_fix.*.
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/run.py --data-dir experiments/results --out experiments/results > experiments/results/raw/run.stdout.txt 2> experiments/results/raw/run.stderr.txt
+
+The runner command was rerun to space the plotted threshold labels; all metric and text artifacts were regenerated from the same fixed dataset. Previous output is preserved as run_pre_plot_layout_fix.*.
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/run.py --data-dir experiments/results --out experiments/results > experiments/results/raw/run.stdout.txt 2> experiments/results/raw/run.stderr.txt
+
+The first runner attempt exited with status 1 (`KeyError` in the ablation adapter); its raw outputs are preserved as run_attempt1.stdout.txt and run_attempt1.stderr.txt. After fixing the adapter, this same command was rerun successfully.
+
+The successful earlier run used one-to-many pair truth for duplicate rows. After reviewing the metric definition, the dataset retained link IDs but the evaluation gold pairs were corrected to one-to-one, and the order analysis was split into fuzzy-only and all-pair changes. The earlier run output is preserved as run_initial_pair_truth.*; the same runner command below generated the final reported results.
+
+env PYTHONHASHSEED=42 MPLCONFIGDIR=experiments/results/raw/mplconfig /opt/anaconda3/bin/python3 experiments/run.py --data-dir experiments/results --out experiments/results > experiments/results/raw/run.stdout.txt 2> experiments/results/raw/run.stderr.txt

@@ -26,41 +26,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 px-6 py-16">
-      <h1 className="text-2xl font-semibold">Log in</h1>
+    <div className="auth-shell">
+      <p className="page-eyebrow">Secure access</p>
+      <h1>Sign in to GSTFlow</h1>
+      <p className="auth-intro">Access your business reconciliation workspace. This student project does not connect to GSTN.</p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           Email
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="portal-input"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="field-label flex flex-col gap-2">
           Password
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="portal-input"
           />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="status-banner error">{error}</p>}
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+          className="primary-button disabled:opacity-50"
         >
-          {busy ? "Logging in..." : "Log in"}
+          {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
       <p className="text-sm text-slate-600">
         No account?{" "}
-        <Link href="/register" className="text-slate-900 underline">
+        <Link href="/register" className="font-semibold text-[#173e66] underline">
           Register your business
         </Link>
       </p>

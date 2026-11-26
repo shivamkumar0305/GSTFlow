@@ -1,0 +1,2 @@
+seed=42 base_invoices=1000 books_rows=1000 statement_rows=950 combined_rows=1950
+base_case_counts=clean_match:400,case_punctuation_only:100,invoice_number_typo:150,gstin_typo:50,value_difference:50,date_shift:50,duplicate_within_file:50,missing_side:100,hard_negative:50

@@ -1,0 +1,29 @@
+{
+  "seed": 42,
+  "hash_seed_environment": "42",
+  "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+  "matplotlib": "3.10.6",
+  "engine_commit": "17b53f231f038b8e626fad76f01a0a4902f16371",
+  "engine_module": "/Users/shivam/Documents/gstflow-minor-project/backend/reconciliation/engine.py",
+  "tolerance": "1.00",
+  "thresholds": [
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+  ],
+  "base_weights": {
+    "invoice": 55.0,
+    "gstin": 20.0,
+    "value": 20.0,
+    "date": 5.0
+  },
+  "books_rows": 1000,
+  "statement_rows": 950,
+  "truth_positive_pairs": 850,
+  "total_pair_universe": 950000,
+  "canonical_mirror_pair_parity": true,
+  "fellegi_sunter": "not run"
+}

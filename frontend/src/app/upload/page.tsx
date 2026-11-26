@@ -9,8 +9,7 @@ import type { InvoiceBatch, ReconciliationRun } from "@/lib/types";
 
 function currentPeriod() {
   const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  return `${month}-${now.getFullYear()}`;
+  return `${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}`;
 }
 
 function UploadContent() {
@@ -20,17 +19,13 @@ function UploadContent() {
   const [statementBatch, setStatementBatch] = useState<InvoiceBatch | null>(null);
   const [reconciling, setReconciling] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const bothReady = booksBatch?.status === "done" && statementBatch?.status === "done";
 
   async function runReconciliation() {
     setError(null);
     setReconciling(true);
     try {
-      const run = await apiFetch<ReconciliationRun>("/api/reconcile/", {
-        method: "POST",
-        body: { period },
-      });
+      const run = await apiFetch<ReconciliationRun>("/api/reconcile/", { method: "POST", body: { period } });
       router.push(`/runs/${run.id}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not start reconciliation.");
@@ -39,58 +34,50 @@ function UploadContent() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-2xl font-semibold">Upload & Reconcile</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Upload your purchase register and the GSTR-2A/2B statement you downloaded from the GST
-        portal for the same period. Matching is deterministic and rule-based — nothing here is
-        decided by an AI model.
-      </p>
-
-      <label className="mt-6 flex max-w-xs flex-col gap-1 text-sm">
-        Period (MM-YYYY)
-        <input
-          value={period}
-          onChange={(e) => setPeriod(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2"
-          placeholder="04-2026"
-        />
-      </label>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <FileUploadBox
-          title="Purchase Register"
-          description="Your own purchase invoice records (CSV or XLSX)."
-          uploadPath="/api/uploads/purchase-register/"
-          period={period}
-          onDone={setBooksBatch}
-        />
-        <FileUploadBox
-          title="GSTR-2A / 2B Statement"
-          description="Downloaded from the GST portal (XLSX or JSON, may be password-protected)."
-          uploadPath="/api/uploads/gstr2a/"
-          period={period}
-          onDone={setStatementBatch}
-        />
+    <div className="portal-page">
+      <div className="page-heading">
+        <div>
+          <p className="page-eyebrow">GSTFlow / New comparison</p>
+          <h1>Upload and reconcile invoices</h1>
+          <p>Choose the same filing period for both files. GSTFlow compares your purchase register with the statement you downloaded from the GST Portal.</p>
+        </div>
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      <div className="step-strip" aria-label="Reconciliation steps">
+        <div className="step-item active"><span className="step-number">1</span><span>Select period and files</span></div>
+        <div className={`step-item ${bothReady ? "active" : ""}`}><span className="step-number">2</span><span>Process invoice rows</span></div>
+        <div className="step-item"><span className="step-number">3</span><span>Review exceptions</span></div>
+      </div>
 
-      <button
-        onClick={runReconciliation}
-        disabled={!bothReady || reconciling}
-        className="mt-8 rounded-md bg-slate-900 px-5 py-2.5 text-sm text-white disabled:opacity-40"
-      >
-        {reconciling ? "Starting reconciliation..." : "Run Reconciliation"}
-      </button>
+      <section className="portal-panel mb-5">
+        <h2 className="section-heading"><span>Return period</span></h2>
+        <label className="field-label flex max-w-xs flex-col gap-2">
+          Period (MM-YYYY)
+          <input value={period} onChange={(e) => setPeriod(e.target.value)} className="portal-input" placeholder="04-2026" />
+        </label>
+        <p className="mt-2 text-xs text-slate-500">Use the same period label for both uploaded batches.</p>
+      </section>
+
+      <div className="mb-5 grid gap-4 md:grid-cols-2">
+        <FileUploadBox title="1 · Purchase register" description="Your business’s recorded purchase invoices (CSV or XLSX)." uploadPath="/api/uploads/purchase-register/" period={period} onDone={setBooksBatch} />
+        <FileUploadBox title="2 · GST statement" description="GSTR-2A/2B file downloaded by you from the GST Portal (XLSX or JSON)." uploadPath="/api/uploads/gstr2a/" period={period} onDone={setStatementBatch} />
+      </div>
+
+      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+        <p className={`status-banner ${booksBatch?.status === "done" ? "success" : ""}`}>Purchase register: {booksBatch?.status === "done" ? `${booksBatch.row_count} rows ready` : booksBatch?.status === "failed" ? "Upload failed" : "Awaiting upload"}</p>
+        <p className={`status-banner ${statementBatch?.status === "done" ? "success" : ""}`}>GST statement: {statementBatch?.status === "done" ? `${statementBatch.row_count} rows ready` : statementBatch?.status === "failed" ? "Upload failed" : "Awaiting upload"}</p>
+      </div>
+
+      {error && <p className="status-banner error mb-4">{error}</p>}
+      <div className="flex flex-wrap items-center gap-4">
+        <button onClick={runReconciliation} disabled={!bothReady || reconciling} className="primary-button">
+          {reconciling ? "Starting comparison…" : "Run reconciliation"}
+        </button>
+        {!bothReady && <span className="text-xs text-slate-500">Both uploads must finish before the comparison can start.</span>}
+      </div>
+      <p className="mt-5 max-w-3xl text-xs leading-5 text-slate-500">The matching result is generated by fixed rules and similarity scoring. A fuzzy result is a suggestion for review, not an automatically confirmed match. GSTFlow does not connect to GSTN or file returns.</p>
     </div>
   );
 }
 
-export default function UploadPage() {
-  return (
-    <RequireAuth>
-      <UploadContent />
-    </RequireAuth>
-  );
-}
+export default function UploadPage() { return <RequireAuth><UploadContent /></RequireAuth>; }

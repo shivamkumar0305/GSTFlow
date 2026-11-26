@@ -1,0 +1,14 @@
+error_type,cause_group,count
+false_negative,invoice_deletion,3
+false_negative,invoice_insertion,4
+false_negative,invoice_substitution,1
+false_negative,invoice_transposition,1
+false_positive,hard_negative vs invoice_number_typo,3
+false_positive,hard_negative vs missing_side,2
+false_positive,invoice_number_typo vs hard_negative,1
+false_positive,invoice_number_typo vs missing_side,1
+false_positive,missing_from_statement,15
+false_positive,missing_side vs hard_negative,2
+false_positive,missing_side vs invoice_number_typo,6
+false_positive,same_invoice_different_supplier,1
+false_positive,same_invoice_same_supplier_different_amount,25
